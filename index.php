@@ -65,7 +65,7 @@ $acessosHoje = $stmt->fetch()['total'];
             <div class="sidebar-footer">
                 <a href="logout.php" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Sair</span>
+                    <span>Sair do Sistema</span>
                 </a>
             </div>
         </aside>
@@ -74,9 +74,15 @@ $acessosHoje = $stmt->fetch()['total'];
         <main class="main-content">
             <div class="top-bar">
                 <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
-                <div class="date-time">
-                    <i class="far fa-calendar-alt"></i>
-                    <span id="currentDate"></span>
+                <div class="header-actions">
+                    <div class="date-time">
+                        <i class="far fa-calendar-alt"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                    <a href="logout.php" class="btn-logout-header" title="Sair do Sistema">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair</span>
+                    </a>
                 </div>
             </div>
 
@@ -202,9 +208,15 @@ $acessosHoje = $stmt->fetch()['total'];
         function updateDateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDate').innerHTML = now.toLocaleDateString('pt-BR', options);
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.innerHTML = now.toLocaleDateString('pt-BR', options);
+            }
         }
         updateDateTime();
+        
+        // Atualizar a cada minuto
+        setInterval(updateDateTime, 60000);
     </script>
 </body>
 </html>
