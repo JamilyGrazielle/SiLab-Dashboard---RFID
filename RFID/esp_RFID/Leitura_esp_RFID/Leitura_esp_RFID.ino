@@ -23,12 +23,15 @@ void setup() {
   
   Serial.println("\n\n=== SISTEMA RFID SiLab ===");
   
+  // Inicializar SPI e RFID
   SPI.begin();
   mfrc522.PCD_Init();
   
+  // Configurar LEDs
   pinMode(LED_VERDE, OUTPUT);
   pinMode(LED_VERMELHO, OUTPUT);
   
+  // Teste dos LEDs
   digitalWrite(LED_VERDE, HIGH);
   delay(300);
   digitalWrite(LED_VERDE, LOW);
@@ -36,6 +39,7 @@ void setup() {
   delay(300);
   digitalWrite(LED_VERMELHO, LOW);
   
+  // Conectar WiFi
   conectarWiFi();
   
   Serial.println("\n✅ Sistema pronto!");
@@ -51,11 +55,12 @@ void conectarWiFi() {
   WiFi.begin(ssid, password);
   
   int tentativas = 0;
-  while (WiFi.status() != WL_CONNECTED && tentativas < 30) {
+  while (WiFi.status() != WL_CONNECTED && tentativas < 30) {  // 30 tentativas = 15 segundos
     delay(500);
     Serial.print(".");
     tentativas++;
     
+    // Pisca LED vermelho enquanto tenta conectar
     digitalWrite(LED_VERMELHO, HIGH);
     delay(100);
     digitalWrite(LED_VERMELHO, LOW);
@@ -64,7 +69,7 @@ void conectarWiFi() {
   Serial.println();
   
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("✅ WiFi conectado!");
+    Serial.println("✅ WiFi conectado com sucesso!");
     Serial.print("📡 IP: ");
     Serial.println(WiFi.localIP());
     digitalWrite(LED_VERDE, HIGH);
@@ -72,6 +77,14 @@ void conectarWiFi() {
     digitalWrite(LED_VERDE, LOW);
   } else {
     Serial.println("❌ Falha na conexão WiFi!");
+    Serial.println("Verifique:");
+    Serial.println("  1. Nome da rede (SSID) está correto?");
+    Serial.println("  2. Senha está correta?");
+    Serial.println("  3. O roteador está ligado?");
+    Serial.println("\n⚠️  Sistema funcionará em modo offline!");
+    Serial.println("   Os códigos RFID serão mostrados apenas no Serial Monitor.");
+    
+    // Pisca LED vermelho 3 vezes para indicar erro
     for (int i = 0; i < 3; i++) {
       digitalWrite(LED_VERMELHO, HIGH);
       delay(300);
@@ -82,22 +95,26 @@ void conectarWiFi() {
 }
 
 void loop() {
+  // Verifica se o WiFi ainda está conectado (reconecta se necessário)
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("📡 WiFi desconectado! Tentando reconectar...");
     conectarWiFi();
   }
   
+  // Verifica se tem cartão
   if (!mfrc522.PICC_IsNewCardPresent()) {
     delay(100);
     return;
   }
   
+  // Seleciona o cartão
   if (!mfrc522.PICC_ReadCardSerial()) {
     return;
   }
   
   Serial.println("\n>>> Cartão detectado! <<<");
   
+  // Converte UID para string (código RFID)
   String rfidCode = "";
   for (byte i = 0; i < mfrc522.uid.size; i++) {
     if (mfrc522.uid.uidByte[i] < 0x10) {
@@ -110,10 +127,15 @@ void loop() {
   Serial.print("📌 CÓDIGO RFID: ");
   Serial.println(rfidCode);
   
+  // Se estiver conectado ao WiFi, envia para o servidor
   if (WiFi.status() == WL_CONNECTED) {
     enviarParaServidor(rfidCode);
   } else {
-    Serial.println("⚠️ Sem WiFi - Acesso não registrado!");
+    Serial.println("⚠️  Sem WiFi - Acesso não registrado!");
+    Serial.print("💡 Cadastre este RFID manualmente no sistema: ");
+    Serial.println(rfidCode);
+    
+    // Pisca LED vermelho indicando erro
     digitalWrite(LED_VERMELHO, HIGH);
     delay(1000);
     digitalWrite(LED_VERMELHO, LOW);
@@ -126,21 +148,21 @@ void loop() {
 void enviarParaServidor(String rfid) {
   HTTPClient http;
   
-  // CORREÇÃO: Espaço codificado como %20
-  String url = String(serverUrl) + "?rfid=" + rfid + "&laboratorio=Lab%2024&action=check";
+  // Configura a URL com os parâmetros
+  String url = String(serverUrl) + "?rfid=" + rfid + "&laboratorio=Lab 24&action=check";
   
   Serial.print("📡 Enviando para: ");
   Serial.println(url);
   
   http.begin(url);
-  http.setTimeout(5000);
+  http.setTimeout(5000); // Timeout de 5 segundos
   
-  int httpCode = http.GET();
+  int httpCode = http.GET();  // Usando GET para simplificar
   
   Serial.print("📡 Resposta HTTP: ");
   Serial.println(httpCode);
   
-  if (httpCode == 200) {
+  if (httpCode > 0) {
     String resposta = http.getString();
     Serial.print("📡 Resposta: ");
     Serial.println(resposta);

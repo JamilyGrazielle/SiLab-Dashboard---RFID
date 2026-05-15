@@ -248,5 +248,37 @@ $professores = $pdo->query("SELECT id, nome_completo, matricula, rfid FROM usuar
         </main>
     </div>
     <script src="script.js"></script>
+
+    <script>
+        // Simular leitura via teclado (leitor RFID)
+        let rfidBuffer = '';
+        let lastKeyTime = 0;
+
+        document.addEventListener('keypress', function(e) {
+            const now = Date.now();
+            
+            if (e.key === 'Enter') {
+                if (rfidBuffer.length > 0) {
+                    document.querySelector('input[name="rfid"]').value = rfidBuffer;
+                    rfidBuffer = '';
+                    // Opcional: submeter automaticamente
+                    // document.querySelector('form').submit();
+                }
+                return;
+            }
+            
+            if (now - lastKeyTime > 100 && rfidBuffer.length > 0) {
+                rfidBuffer = '';
+            }
+            
+            if (e.key.match(/[A-Z0-9]/i)) {
+                rfidBuffer += e.key.toUpperCase();
+                lastKeyTime = now;
+            }
+        });
+
+        // Foco automático no campo RFID
+        document.querySelector('input[name="rfid"]').focus();
+    </script>
 </body>
 </html>

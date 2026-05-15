@@ -61,6 +61,10 @@ $acessosHoje = $stmt->fetch()['total'];
                     <i class="fas fa-door-open"></i>
                     <span>Lista de Acesso</span>
                 </a>
+                <a href="monitor_acessos.php" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Monitor de Acessos</span>
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <a href="logout.php" class="logout-btn">
