@@ -3,15 +3,25 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Preferences.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <WebServer.h>
+#include <DNSServer.h>
 
 #define SS_PIN          21
 #define RST_PIN         22
 #define LED_VERDE       2
 #define LED_VERMELHO    15
 #define BOTAO_RESET     4
+#define SDA_PIN 16
+#define SCL_PIN 17
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 Preferences preferences;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+WebServer server(80);
+
+bool modoConfiguracao = false;
 
 // ===============================
 // CONFIGURAÇÕES
@@ -34,6 +44,23 @@ void setup() {
   delay(1000);
 
   Serial.println("\n\n=== SISTEMA RFID SiLab ===");
+  // ===============================
+  // LCD
+  // ===============================
+
+  Wire.begin(SDA_PIN, SCL_PIN);
+
+  lcd.init();
+
+  lcd.backlight();
+
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("SiLab RFID");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Inicializando");
 
   SPI.begin();
   mfrc522.PCD_Init();
@@ -50,6 +77,14 @@ void setup() {
   if (digitalRead(BOTAO_RESET) == LOW) {
 
     Serial.println("\n⚠️ RESET DE FABRICA");
+
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print("RESET FABRICA");
+
+    lcd.setCursor(0, 1);
+    lcd.print("Apagando...");
 
     preferences.begin("silab", false);
 
@@ -127,6 +162,8 @@ void setup() {
 
   conectarWiFi();
 
+  telaPadrao();
+
   Serial.println("\n✅ Sistema pronto!");
   Serial.println("Aproxime o cartão...");
   Serial.println("================================");
@@ -178,7 +215,7 @@ void loop() {
   // WIFI DESCONECTADO
   // ===============================
 
-  if (WiFi.status() != WL_CONNECTED) {
+  /*if (WiFi.status() != WL_CONNECTED) {
 
     Serial.println("\n❌ WIFI DESCONECTADO");
 
@@ -216,7 +253,7 @@ void loop() {
     }
 
     conectarWiFi();
-  }
+  }*/
 
   // ===============================
   // AGUARDAR CARTÃO
@@ -233,6 +270,11 @@ void loop() {
   }
 
   Serial.println("\n>>> CARTÃO DETECTADO <<<");
+
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("Cartao Lido");
 
   String rfidCode = "";
 
@@ -257,6 +299,9 @@ void loop() {
 
   Serial.print("RFID: ");
   Serial.println(rfidCode);
+  lcd.setCursor(0, 1);
+
+  lcd.print(rfidCode);
 
   // ===============================
   // ENVIAR PARA SERVIDOR
@@ -286,65 +331,172 @@ void loop() {
 
 void configurarSistema() {
 
-  Serial.println("\n=== CONFIGURAÇÃO INICIAL ===");
+  modoConfiguracao = true;
 
-  Serial.println("Digite o nome da rede WiFi:");
+  WiFi.mode(WIFI_AP);
 
-  while (!Serial.available()) {
-    delay(100);
+  WiFi.softAP(
+      "SiLab_Config",
+      "12345678"
+  );
+
+  IPAddress IP = WiFi.softAPIP();
+
+  Serial.println("\n=== MODO CONFIG ===");
+
+  Serial.print("IP: ");
+  Serial.println(IP);
+
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("MODO CONFIG");
+
+  lcd.setCursor(0, 1);
+  lcd.print(IP.toString());
+
+  // ============================
+  // PAGINA HTML
+  // ============================
+
+  server.on("/", HTTP_GET, []() {
+
+    String pagina = R"rawliteral(
+
+      <!DOCTYPE html>
+      <html>
+
+      <head>
+        <meta charset="UTF-8">
+        <title>SiLab Config</title>
+
+        <style>
+
+          body{
+            font-family: Arial;
+            margin:40px;
+          }
+
+          input{
+            width:100%;
+            padding:10px;
+            margin-bottom:10px;
+          }
+
+          button{
+            padding:10px;
+            width:100%;
+          }
+
+        </style>
+
+      </head>
+
+      <body>
+
+        <h2>Configuração SiLab</h2>
+
+        <form action="/salvar">
+
+          <label>WiFi</label>
+          <input name="ssid">
+
+          <label>Senha</label>
+          <input name="password">
+
+          <label>IP Servidor</label>
+          <input name="serverip">
+
+          <label>Laboratório</label>
+          <input name="lab">
+
+          <button type="submit">
+            Salvar
+          </button>
+
+        </form>
+
+      </body>
+
+      </html>
+
+    )rawliteral";
+
+    server.send(200, "text/html", pagina);
+  });
+
+  // ============================
+  // SALVAR CONFIG
+  // ============================
+
+  server.on("/salvar", HTTP_GET, []() {
+
+    ssid =
+      server.arg("ssid");
+
+    password =
+      server.arg("password");
+
+    serverIP =
+      server.arg("serverip");
+
+    laboratorio =
+      server.arg("lab");
+
+    preferences.begin("silab", false);
+
+    preferences.putString("ssid", ssid);
+
+    preferences.putString(
+        "password",
+        password
+    );
+
+    preferences.putString(
+        "serverip",
+        serverIP
+    );
+
+    preferences.putString(
+        "lab",
+        laboratorio
+    );
+
+    preferences.end();
+
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print("CONFIG SALVA");
+
+    lcd.setCursor(0, 1);
+    lcd.print(laboratorio);
+
+    server.send(
+        200,
+        "text/html",
+        "<h1>Configuracao salva!</h1><h2>Reiniciando ESP...</h2>"
+    );
+
+    delay(3000);
+
+    ESP.restart();
+  });
+
+  server.begin();
+
+  Serial.println("Servidor iniciado");
+
+  // ============================
+  // LOOP CONFIG
+  // ============================
+
+  while (modoConfiguracao) {
+
+    server.handleClient();
+
+    delay(10);
   }
-
-  ssid = Serial.readStringUntil('\n');
-  ssid.trim();
-
-  Serial.println("Digite a senha:");
-
-  while (!Serial.available()) {
-    delay(100);
-  }
-
-  password =
-      Serial.readStringUntil('\n');
-
-  password.trim();
-
-  Serial.println("Digite o IP do servidor:");
-
-  while (!Serial.available()) {
-    delay(100);
-  }
-
-  serverIP =
-      Serial.readStringUntil('\n');
-
-  serverIP.trim();
-
-  Serial.println("Digite o laboratório:");
-  Serial.println("Exemplo: Lab 24");
-
-  while (!Serial.available()) {
-    delay(100);
-  }
-
-  laboratorio =
-      Serial.readStringUntil('\n');
-
-  laboratorio.trim();
-
-  // ===============================
-  // SALVAR
-  // ===============================
-
-  preferences.begin("silab", false);
-
-  preferences.putString("ssid", ssid);
-  preferences.putString("password", password);
-  preferences.putString("serverip", serverIP);
-  preferences.putString("lab", laboratorio);
-
-  preferences.end();
-
-  Serial.println("\n✅ CONFIGURAÇÃO SALVA");
 }
 
 // ===============================
@@ -391,6 +543,14 @@ void conectarWiFi() {
     Serial.print("IP ESP: ");
     Serial.println(WiFi.localIP());
 
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print(laboratorio);
+
+    lcd.setCursor(0, 1);
+    lcd.print("WiFi OK");
+
     digitalWrite(LED_VERDE, HIGH);
     delay(500);
     digitalWrite(LED_VERDE, LOW);
@@ -401,6 +561,14 @@ void conectarWiFi() {
 
     Serial.print("CÓDIGO: ");
     Serial.println(WiFi.status());
+
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print("ERRO WIFI");
+
+    lcd.setCursor(0, 1);
+    lcd.print(WiFi.status());
 
     digitalWrite(LED_VERMELHO, HIGH);
     delay(1000);
@@ -447,10 +615,14 @@ void enviarParaServidor(String rfid) {
     Serial.println("📡 RESPOSTA:");
     Serial.println(resposta);
 
-    if (
-        resposta.indexOf("\"success\":true")
-        >= 0
-    ) {
+    if (resposta.indexOf("\"success\":true") >= 0) {
+      lcd.clear();
+
+      lcd.setCursor(0, 0);
+      lcd.print("ACESSO OK");
+
+      lcd.setCursor(0, 1);
+      lcd.print(laboratorio);
 
       Serial.println("✅ ACESSO LIBERADO");
 
@@ -459,6 +631,14 @@ void enviarParaServidor(String rfid) {
       digitalWrite(LED_VERDE, LOW);
 
     } else {
+
+      lcd.clear();
+
+      lcd.setCursor(0, 0);
+      lcd.print("ACESSO");
+
+      lcd.setCursor(0, 1);
+      lcd.print("NEGADO");
 
       Serial.println("❌ ACESSO NEGADO");
 
@@ -469,6 +649,14 @@ void enviarParaServidor(String rfid) {
 
   } else {
 
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print("ERRO HTTP");
+
+    lcd.setCursor(0, 1);
+    lcd.print(httpCode);
+
     Serial.println("❌ ERRO HTTP");
 
     digitalWrite(LED_VERMELHO, HIGH);
@@ -476,5 +664,28 @@ void enviarParaServidor(String rfid) {
     digitalWrite(LED_VERMELHO, LOW);
   }
 
+  delay(3000);
+
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print(laboratorio);
+
+  lcd.setCursor(0, 1);
+  lcd.print("Aproxime RFID");
+
   http.end();
+}
+
+void telaPadrao() {
+
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+
+  lcd.print(laboratorio);
+
+  lcd.setCursor(0, 1);
+
+  lcd.print("Aproxime RFID");
 }
