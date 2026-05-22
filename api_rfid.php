@@ -40,6 +40,73 @@ if ($action === 'get_professores' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     exit;
 }
 
+function liberarAcesso(
+    $pdo,
+    $professor,
+    $laboratorio,
+    $mensagem,
+    $disciplina = null
+) {
+
+    $detalhes_acesso = json_encode([
+        'laboratorio' => $laboratorio,
+        'professor_id' => $professor['id'],
+        'professor_nome' => $professor['nome_completo'],
+        'matricula' => $professor['matricula'],
+        'disciplina' => $disciplina
+    ]);
+
+    $stmt = $pdo->prepare("
+        INSERT INTO log_sistema
+        (
+            usuario_id,
+            acao,
+            entidade,
+            entidade_id,
+            detalhes,
+            ip_origem
+        )
+        VALUES
+        (
+            ?,
+            'acesso_laboratorio',
+            'acesso_laboratorio',
+            NULL,
+            ?,
+            ?
+        )
+    ");
+
+    $stmt->execute([
+        $professor['id'],
+        $detalhes_acesso,
+        $_SERVER['REMOTE_ADDR'] ?? null
+    ]);
+
+    echo json_encode([
+        'success' => true,
+        'message' => $mensagem,
+        'professor' => [
+            'nome' => $professor['nome_completo'],
+            'matricula' => $professor['matricula'],
+            'laboratorio' => $laboratorio,
+            'disciplina' => $disciplina,
+            'data_hora' => date('d/m/Y H:i:s')
+        ]
+    ]);
+
+    registrarLogRFID(
+        $pdo,
+        $professor['matricula'],
+        $laboratorio,
+        'success',
+        $mensagem,
+        $professor['id']
+    );
+
+    exit;
+}
+
 if (!$rfid) {
     echo json_encode(['success' => false, 'message' => 'RFID não informado']);
     exit;
@@ -75,8 +142,16 @@ if (!$laboratorio || !in_array($laboratorio, $laboratorios_validos)) {
 }
 
 // Buscar professor pelo RFID
-$stmt = $pdo->prepare("SELECT id, nome_completo, matricula, status FROM usuario WHERE rfid = ? AND perfil = 'professor'");
-$stmt->execute([$rfid]);
+$stmt = $pdo->prepare("
+    SELECT
+        id,
+        nome_completo,
+        matricula,
+        status,
+        perfil
+    FROM usuario
+    WHERE rfid = ?
+");$stmt->execute([$rfid]);
 $professor = $stmt->fetch();
 
 if (!$professor) {
@@ -89,52 +164,163 @@ if (!$professor) {
     exit;
 }
 
-// Verificar se professor está ativo
+// ===============================
+// VERIFICAR STATUS PROFESSOR
+// ===============================
+
 if ($professor['status'] !== 'aprovado') {
+
     echo json_encode([
-        'success' => false, 
-        'message' => 'Professor não está ativo no sistema.'
+        'success' => false,
+        'message' => 'Professor não está ativo.'
     ]);
-    registrarLogRFID($pdo, $rfid, $laboratorio, 'error', 'Professor inativo', $professor['id']);
+
+    registrarLogRFID(
+        $pdo,
+        $rfid,
+        $laboratorio,
+        'error',
+        'Professor inativo',
+        $professor['id']
+    );
+
     exit;
 }
 
-// Verificar se o laboratório está disponível
-$stmt = $pdo->prepare("SELECT status_laboratorio FROM laboratorio WHERE nome = ?");
+// ===============================
+// ROOT TEM ACESSO TOTAL
+// ===============================
+
+if ($professor['perfil'] === 'root') {
+
+    liberarAcesso(
+        $pdo,
+        $professor,
+        $laboratorio,
+        'Acesso ROOT liberado'
+    );
+}
+
+// ===============================
+// VERIFICAR LABORATÓRIO
+// ===============================
+
+$stmt = $pdo->prepare("
+    SELECT id, status_laboratorio
+    FROM laboratorio
+    WHERE nome = ?
+");
+
 $stmt->execute([$laboratorio]);
+
 $lab = $stmt->fetch();
 
-if (!$lab || $lab['status_laboratorio'] === 'em_manutencao') {
+if (
+    !$lab ||
+    $lab['status_laboratorio'] === 'em_manutencao'
+) {
+
     echo json_encode([
-        'success' => false, 
-        'message' => 'Laboratório em manutenção. Acesso negado.'
+        'success' => false,
+        'message' => 'Laboratório indisponível.'
     ]);
-    registrarLogRFID($pdo, $rfid, $laboratorio, 'error', 'Laboratório em manutenção', $professor['id']);
+
+    registrarLogRFID(
+        $pdo,
+        $rfid,
+        $laboratorio,
+        'error',
+        'Laboratório indisponível',
+        $professor['id']
+    );
+
     exit;
 }
 
-// Registrar acesso
-$detalhes_acesso = json_encode([
-    'laboratorio' => $laboratorio,
-    'professor_id' => $professor['id'],
-    'professor_nome' => $professor['nome_completo'],
-    'matricula' => $professor['matricula']
+// ===============================
+// DIA E HORA ATUAL
+// ===============================
+
+$diasSemana = [
+    'Sunday'    => 'domingo',
+    'Monday'    => 'segunda',
+    'Tuesday'   => 'terca',
+    'Wednesday' => 'quarta',
+    'Thursday'  => 'quinta',
+    'Friday'    => 'sexta',
+    'Saturday'  => 'sabado'
+];
+
+$diaAtual = $diasSemana[date('l')];
+
+$horaAtual = date('H:i:s');
+
+// ===============================
+// VERIFICAR RESERVA
+// ===============================
+
+$stmt = $pdo->prepare("
+    SELECT
+        rl.id,
+        d.nome AS disciplina
+    FROM reserva_laboratorio rl
+
+    INNER JOIN disciplina d
+        ON d.id = rl.disciplina_id
+
+    WHERE
+        rl.professor_id = ?
+        AND rl.laboratorio_id = ?
+        AND rl.dia_semana = ?
+        AND ? BETWEEN rl.horario_inicio
+                  AND rl.horario_fim
+        AND rl.status = 'ativa'
+
+    LIMIT 1
+");
+
+$stmt->execute([
+    $professor['id'],
+    $lab['id'],
+    $diaAtual,
+    $horaAtual
 ]);
 
-$stmt = $pdo->prepare("INSERT INTO log_sistema (usuario_id, acao, entidade, entidade_id, detalhes, ip_origem) 
-                       VALUES (?, 'acesso_laboratorio', 'acesso_laboratorio', NULL, ?, ?)");
-$stmt->execute([$professor['id'], $detalhes_acesso, $_SERVER['REMOTE_ADDR'] ?? null]);
+$reserva = $stmt->fetch();
 
-echo json_encode([
-    'success' => true, 
-    'message' => 'Acesso liberado!',
-    'professor' => [
-        'nome' => $professor['nome_completo'],
-        'matricula' => $professor['matricula'],
-        'laboratorio' => $laboratorio,
-        'data_hora' => date('d/m/Y H:i:s')
-    ]
-]);
+// ===============================
+// SEM RESERVA
+// ===============================
 
-registrarLogRFID($pdo, $rfid, $laboratorio, 'success', 'Acesso liberado', $professor['id']);
-?>
+if (!$reserva) {
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'Sem reserva neste horário.',
+        'dia' => $diaAtual,
+        'hora' => $horaAtual
+    ]);
+
+    registrarLogRFID(
+        $pdo,
+        $rfid,
+        $laboratorio,
+        'error',
+        'Tentativa sem reserva',
+        $professor['id']
+    );
+
+    exit;
+}
+
+// ===============================
+// ACESSO LIBERADO
+// ===============================
+
+liberarAcesso(
+    $pdo,
+    $professor,
+    $laboratorio,
+    'Acesso liberado',
+    $reserva['disciplina']
+);
