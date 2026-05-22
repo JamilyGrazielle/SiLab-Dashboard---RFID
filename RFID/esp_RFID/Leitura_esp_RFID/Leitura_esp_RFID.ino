@@ -48,49 +48,43 @@ void setup() {
 }
 
 void conectarWiFi() {
-  Serial.print("\n📡 Conectando ao WiFi: ");
-  Serial.println(ssid);
-  
+
+  Serial.println("\nConectando WiFi...");
+
   WiFi.mode(WIFI_STA);
+
+  WiFi.disconnect(true, true);
+
+  WiFi.setSleep(false);
+
+  delay(2000);
+
   WiFi.begin(ssid, password);
-  
+
   int tentativas = 0;
-  while (WiFi.status() != WL_CONNECTED && tentativas < 30) {  // 30 tentativas = 15 segundos
+
+  while (WiFi.status() != WL_CONNECTED && tentativas < 40) {
+
     delay(500);
+
     Serial.print(".");
+
     tentativas++;
-    
-    // Pisca LED vermelho enquanto tenta conectar
-    digitalWrite(LED_VERMELHO, HIGH);
-    delay(100);
-    digitalWrite(LED_VERMELHO, LOW);
   }
-  
+
   Serial.println();
-  
+
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("✅ WiFi conectado com sucesso!");
-    Serial.print("📡 IP: ");
+
+    Serial.println("✅ WIFI CONECTADO");
+    Serial.print("IP: ");
     Serial.println(WiFi.localIP());
-    digitalWrite(LED_VERDE, HIGH);
-    delay(500);
-    digitalWrite(LED_VERDE, LOW);
+
   } else {
-    Serial.println("❌ Falha na conexão WiFi!");
-    Serial.println("Verifique:");
-    Serial.println("  1. Nome da rede (SSID) está correto?");
-    Serial.println("  2. Senha está correta?");
-    Serial.println("  3. O roteador está ligado?");
-    Serial.println("\n⚠️  Sistema funcionará em modo offline!");
-    Serial.println("   Os códigos RFID serão mostrados apenas no Serial Monitor.");
-    
-    // Pisca LED vermelho 3 vezes para indicar erro
-    for (int i = 0; i < 3; i++) {
-      digitalWrite(LED_VERMELHO, HIGH);
-      delay(300);
-      digitalWrite(LED_VERMELHO, LOW);
-      delay(200);
-    }
+
+    Serial.println("❌ FALHA WIFI");
+    Serial.print("Código: ");
+    Serial.println(WiFi.status());
   }
 }
 

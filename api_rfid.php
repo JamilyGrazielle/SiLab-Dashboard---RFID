@@ -56,7 +56,7 @@ function registrarLogRFID($pdo, $rfid, $laboratorio, $status, $mensagem, $profes
     ]);
     
     $stmt = $pdo->prepare("INSERT INTO log_sistema (usuario_id, acao, entidade, entidade_id, detalhes, ip_origem) 
-                           VALUES (?, 'LEITURA_RFID', 'rfid', NULL, ?, ?)");
+                           VALUES (?, 'leitura_rfid', 'rfid', NULL, ?, ?)");
     $stmt->execute([$professor_id, $detalhes, $ip]);
 }
 
@@ -122,7 +122,7 @@ $detalhes_acesso = json_encode([
 ]);
 
 $stmt = $pdo->prepare("INSERT INTO log_sistema (usuario_id, acao, entidade, entidade_id, detalhes, ip_origem) 
-                       VALUES (?, 'ACESSO_LABORATORIO', 'acesso_laboratorio', NULL, ?, ?)");
+                       VALUES (?, 'acesso_laboratorio', 'acesso_laboratorio', NULL, ?, ?)");
 $stmt->execute([$professor['id'], $detalhes_acesso, $_SERVER['REMOTE_ADDR'] ?? null]);
 
 echo json_encode([

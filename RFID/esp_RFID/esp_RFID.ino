@@ -13,7 +13,7 @@ const char* ssid = "IFMA";
 const char* password = "ifma1234";
 
 // URL do servidor
-const char* serverUrl = "http://192.168.137.44:8000/api_rfid.php";
+const char* serverUrl = "http://192.168.137.44/api_rfid.php";
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
@@ -44,40 +44,43 @@ void setup() {
 }
 
 void conectarWiFi() {
-  Serial.print("\n📡 Conectando ao WiFi: ");
-  Serial.println(ssid);
-  
+
+  Serial.println("\nConectando WiFi...");
+
   WiFi.mode(WIFI_STA);
+
+  WiFi.disconnect(true, true);
+
+  WiFi.setSleep(false);
+
+  delay(2000);
+
   WiFi.begin(ssid, password);
-  
+
   int tentativas = 0;
-  while (WiFi.status() != WL_CONNECTED && tentativas < 30) {
+
+  while (WiFi.status() != WL_CONNECTED && tentativas < 40) {
+
     delay(500);
+
     Serial.print(".");
+
     tentativas++;
-    
-    digitalWrite(LED_VERMELHO, HIGH);
-    delay(100);
-    digitalWrite(LED_VERMELHO, LOW);
   }
-  
+
   Serial.println();
-  
+
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("✅ WiFi conectado!");
-    Serial.print("📡 IP: ");
+
+    Serial.println("✅ WIFI CONECTADO");
+    Serial.print("IP: ");
     Serial.println(WiFi.localIP());
-    digitalWrite(LED_VERDE, HIGH);
-    delay(500);
-    digitalWrite(LED_VERDE, LOW);
+
   } else {
-    Serial.println("❌ Falha na conexão WiFi!");
-    for (int i = 0; i < 3; i++) {
-      digitalWrite(LED_VERMELHO, HIGH);
-      delay(300);
-      digitalWrite(LED_VERMELHO, LOW);
-      delay(200);
-    }
+
+    Serial.println("❌ FALHA WIFI");
+    Serial.print("Código: ");
+    Serial.println(WiFi.status());
   }
 }
 
