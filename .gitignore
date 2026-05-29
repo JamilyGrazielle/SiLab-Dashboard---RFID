@@ -7,3 +7,9 @@ RFID/
 
 .env
 .env.local
+
+.env
+vendor/
+.vscode/
+.idea/
+*.log
