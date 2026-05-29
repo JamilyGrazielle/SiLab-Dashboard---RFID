@@ -1,0 +1,9 @@
+RFID/
+
+.vscode/
+.idea/
+
+*.log
+
+.env
+.env.local
