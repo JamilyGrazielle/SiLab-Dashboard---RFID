@@ -112,7 +112,7 @@ if (!$rfid) {
     exit;
 }
 
-// Registrar log da leitura
+// Registrar log da leituras
 function registrarLogRFID($pdo, $rfid, $laboratorio, $status, $mensagem, $professor_id = null) {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     $detalhes = json_encode([
