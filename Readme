@@ -12,29 +12,28 @@ O sistema utiliza um leitor RFID conectado a um ESP32 para identificar cartões 
 
 Implementar uma solução de controle de acesso baseada em RFID capaz de:
 
-* Identificar usuários através de cartões RFID;
-* Registrar acessos aos laboratórios;
-* Integrar-se ao sistema SiLab;
-* Aumentar a segurança dos ambientes;
-* Automatizar o gerenciamento de entrada de usuários.
+- Identificar usuários através de cartões RFID;
+- Registrar acessos aos laboratórios;
+- Integrar-se ao sistema SiLab;
+- Aumentar a segurança dos ambientes;
+- Automatizar o gerenciamento de entrada de usuários.
 
 ---
 
 ## ⚙️ Funcionamento
-
-```text
 Cartão RFID
-      ↓
+↓
 Leitor MFRC522
-      ↓
+↓
 ESP32
-      ↓
+↓
 Servidor SiLab
-      ↓
+↓
 Validação de Permissão
-      ↓
+↓
 Acesso Liberado ou Negado
-```
+
+text
 
 ---
 
@@ -42,22 +41,22 @@ Acesso Liberado ou Negado
 
 ### Hardware
 
-* ESP32
-* Módulo RFID MFRC522
-* Display LCD I2C 16x2
-* LEDs de sinalização
-* Botão de Reset
-* Protoboard
-* Jumpers
+- ESP32
+- Módulo RFID MFRC522
+- Display LCD I2C 16x2
+- LEDs de sinalização
+- Botão de Reset
+- Protoboard
+- Jumpers
 
 ### Software
 
-* Arduino IDE
-* C++
-* PHP
-* MySQL
-* Git
-* GitHub
+- Arduino IDE
+- C++
+- PHP
+- MySQL
+- Git
+- GitHub
 
 ---
 
@@ -73,53 +72,51 @@ Acesso Liberado ou Negado
 #include <LiquidCrystal_I2C.h>
 #include <WebServer.h>
 #include <DNSServer.h>
-```
+🔌 Componentes Utilizados
+Componente	Função
+ESP32	Controle principal do sistema
+MFRC522	Leitura dos cartões RFID
+LCD I2C 16x2	Exibição de mensagens
+LED Verde	Indicação de acesso autorizado
+LED Vermelho	Indicação de acesso negado
+Botão Reset	Reinicialização das configurações
+Wi-Fi	Comunicação com o servidor SiLab
+✅ Funcionalidades Implementadas
+Leitura de cartões RFID
 
----
+Conexão Wi-Fi utilizando ESP32
 
-## 🔌 Componentes Utilizados
+Comunicação HTTP com servidor
 
-| Componente   | Função                            |
-| ------------ | --------------------------------- |
-| ESP32        | Controle principal do sistema     |
-| MFRC522      | Leitura dos cartões RFID          |
-| LCD I2C 16x2 | Exibição de mensagens             |
-| LED Verde    | Indicação de acesso autorizado    |
-| LED Vermelho | Indicação de acesso negado        |
-| Botão Reset  | Reinicialização das configurações |
-| Wi-Fi        | Comunicação com o servidor SiLab  |
+Display LCD para feedback ao usuário
 
----
+LEDs de acesso autorizado e negado
 
-## ✅ Funcionalidades Implementadas
+Armazenamento persistente de configurações
 
-* [x] Leitura de cartões RFID
-* [x] Conexão Wi-Fi utilizando ESP32
-* [x] Comunicação HTTP com servidor
-* [x] Display LCD para feedback ao usuário
-* [x] LEDs de acesso autorizado e negado
-* [x] Armazenamento persistente de configurações
-* [x] Portal Web para configuração inicial
-* [x] Configuração de laboratório associada ao dispositivo
-* [x] Reset de fábrica do dispositivo
+Portal Web para configuração inicial
 
----
+Configuração de laboratório associada ao dispositivo
 
-## 🚧 Funcionalidades em Desenvolvimento
+Reset de fábrica do dispositivo
 
-* [ ] Integração completa com o SiLab
-* [ ] Registro de histórico de acessos
-* [ ] Dashboard de monitoramento
-* [ ] Relatórios de utilização
-* [ ] Controle de permissões por laboratório
-* [ ] Controle de horários de acesso
-* [ ] Cadastro de usuários via interface web
+🚧 Funcionalidades em Desenvolvimento
+Integração completa com o SiLab
 
----
+Registro de histórico de acessos
 
-## 📂 Estrutura do Projeto
+Dashboard de monitoramento
 
-```text
+Relatórios de utilização
+
+Controle de permissões por laboratório
+
+Controle de horários de acesso
+
+Cadastro de usuários via interface web
+
+📂 Estrutura do Projeto
+text
 RFID/
 │
 ├── esp_RFID/
@@ -131,46 +128,40 @@ RFID/
 ├── Banco de Dados MySQL
 │
 └── Documentação
-```
-
----
-
-## 📸 Protótipo
-
+📸 Protótipo
 Adicione uma foto do protótipo após a montagem:
 
-```md
+text
 ![Protótipo RFID](imagens/prototipo.jpg)
-```
-
----
-
-## 📊 Status do Projeto
-
+📊 Status do Projeto
 🚧 Em desenvolvimento — Etapa 2
 
 Atualmente o sistema já realiza:
 
-* Leitura de cartões RFID;
-* Comunicação com o servidor via Wi-Fi;
-* Validação de acesso;
-* Exibição de mensagens no LCD;
-* Sinalização visual através de LEDs.
+Leitura de cartões RFID;
+
+Comunicação com o servidor via Wi-Fi;
+
+Validação de acesso;
+
+Exibição de mensagens no LCD;
+
+Sinalização visual através de LEDs.
 
 As próximas etapas incluem a integração completa com o SiLab e a implementação do histórico de acessos.
 
----
-
-## 👨‍💻 Autor
-
-**Jamily Grazielle Sousa Maciel**
+👨‍💻 Autor
+Jamily Grazielle Sousa Maciel
 
 Bacharelado em Sistemas de Informação – IFMA
 
 Projeto desenvolvido para a disciplina de Internet das Coisas (IoT).
 
+📄 Licença
+Projeto desenvolvido para fins acadêmicos.
+
+text
+
 ---
 
-## 📄 Licença
-
-Projeto desenvolvido para fins acadêmicos.
+Basta copiar todo o conteúdo acima e colar em um arquivo chamado `README.md` na raiz do seu projeto. O arquivo será renderizado corretamente no GitHub, GitLab ou qualquer outra plataforma que suporte Markdown.
