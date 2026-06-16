@@ -64,16 +64,30 @@ Acesso Liberado ou Negado
 ## 📦 Bibliotecas Utilizadas
 
 ```cpp
-MFRC522
-SPI
-WiFi
-HTTPClient
-Preferences
-Wire
-LiquidCrystal_I2C
-WebServer
-DNSServer
+#include <MFRC522.h>
+#include <SPI.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <Preferences.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <WebServer.h>
+#include <DNSServer.h>
 ```
+
+---
+
+## 🔌 Componentes Utilizados
+
+| Componente   | Função                            |
+| ------------ | --------------------------------- |
+| ESP32        | Controle principal do sistema     |
+| MFRC522      | Leitura dos cartões RFID          |
+| LCD I2C 16x2 | Exibição de mensagens             |
+| LED Verde    | Indicação de acesso autorizado    |
+| LED Vermelho | Indicação de acesso negado        |
+| Botão Reset  | Reinicialização das configurações |
+| Wi-Fi        | Comunicação com o servidor SiLab  |
 
 ---
 
@@ -103,19 +117,6 @@ DNSServer
 
 ---
 
-## 🔌 Componentes do Circuito
-
-| Componente   | Função                            |
-| ------------ | --------------------------------- |
-| ESP32        | Controle principal do sistema     |
-| MFRC522      | Leitura dos cartões RFID          |
-| LCD I2C      | Exibição de mensagens             |
-| LED Verde    | Indicação de acesso autorizado    |
-| LED Vermelho | Indicação de acesso negado        |
-| Botão Reset  | Reinicialização das configurações |
-
----
-
 ## 📂 Estrutura do Projeto
 
 ```text
@@ -136,19 +137,27 @@ RFID/
 
 ## 📸 Protótipo
 
-Adicione aqui uma foto do protótipo em funcionamento.
+Adicione uma foto do protótipo após a montagem:
 
 ```md
-![Protótipo](imagens/prototipo.jpg)
+![Protótipo RFID](imagens/prototipo.jpg)
 ```
 
 ---
 
 ## 📊 Status do Projeto
 
-🚧 Projeto em desenvolvimento (Etapa 2)
+🚧 Em desenvolvimento — Etapa 2
 
-Atualmente o sistema já realiza a leitura de cartões RFID, comunicação com servidor e validação de acesso. As próximas etapas envolvem a integração completa com o SiLab e o armazenamento do histórico de acessos.
+Atualmente o sistema já realiza:
+
+* Leitura de cartões RFID;
+* Comunicação com o servidor via Wi-Fi;
+* Validação de acesso;
+* Exibição de mensagens no LCD;
+* Sinalização visual através de LEDs.
+
+As próximas etapas incluem a integração completa com o SiLab e a implementação do histórico de acessos.
 
 ---
 
@@ -156,7 +165,7 @@ Atualmente o sistema já realiza a leitura de cartões RFID, comunicação com s
 
 **Jamily Grazielle Sousa Maciel**
 
-Bacharelado em Sistemas de Informação - IFMA
+Bacharelado em Sistemas de Informação – IFMA
 
 Projeto desenvolvido para a disciplina de Internet das Coisas (IoT).
 
