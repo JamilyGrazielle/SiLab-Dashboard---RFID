@@ -23,10 +23,6 @@ WebServer server(80);
 
 bool modoConfiguracao = false;
 
-// ===============================
-// CONFIGURAÇÕES
-// ===============================
-
 String ssid = "";
 String password = "";
 String serverIP = "";
@@ -34,19 +30,12 @@ String laboratorio = "";
 
 String serverUrl = "";
 
-// ===============================
-// SETUP
-// ===============================
-
 void setup() {
 
   Serial.begin(115200);
   delay(1000);
 
   Serial.println("\n\n=== SISTEMA RFID SiLab ===");
-  // ===============================
-  // LCD
-  // ===============================
 
   Wire.begin(SDA_PIN, SCL_PIN);
 
@@ -70,13 +59,9 @@ void setup() {
 
   pinMode(BOTAO_RESET, INPUT_PULLUP);
 
-  // ===============================
-  // RESET DE FABRICA
-  // ===============================
-
   if (digitalRead(BOTAO_RESET) == LOW) {
 
-    Serial.println("\n⚠️ RESET DE FABRICA");
+    Serial.println("\n RESET DE FABRICA");
 
     lcd.clear();
 
@@ -97,10 +82,6 @@ void setup() {
     ESP.restart();
   }
 
-  // ===============================
-  // TESTE DOS LEDs
-  // ===============================
-
   digitalWrite(LED_VERDE, HIGH);
   delay(300);
   digitalWrite(LED_VERDE, LOW);
@@ -108,10 +89,6 @@ void setup() {
   digitalWrite(LED_VERMELHO, HIGH);
   delay(300);
   digitalWrite(LED_VERMELHO, LOW);
-
-  // ===============================
-  // CARREGAR CONFIGURAÇÕES
-  // ===============================
 
   preferences.begin("silab", false);
 
@@ -121,10 +98,6 @@ void setup() {
   laboratorio = preferences.getString("lab", "");
 
   preferences.end();
-
-  // ===============================
-  // PRIMEIRA CONFIGURAÇÃO
-  // ===============================
 
   if (
       ssid == "" ||
@@ -136,18 +109,10 @@ void setup() {
     configurarSistema();
   }
 
-  // ===============================
-  // MONTAR URL
-  // ===============================
-
   serverUrl =
       "http://" +
       serverIP +
       "/api_rfid.php";
-
-  // ===============================
-  // MOSTRAR CONFIG
-  // ===============================
 
   Serial.println("\n=== CONFIGURAÇÃO ===");
 
@@ -164,28 +129,19 @@ void setup() {
 
   telaPadrao();
 
-  Serial.println("\n✅ Sistema pronto!");
+  Serial.println("\nSistema pronto!");
   Serial.println("Aproxime o cartão...");
   Serial.println("================================");
 }
 
-// ===============================
-// LOOP
-// ===============================
-
 void loop() {
-
-  // ===============================
-  // BOTÃO RESET
-  // ===============================
 
   if (digitalRead(BOTAO_RESET) == LOW) {
 
-    Serial.println("\n⚠️ BOTÃO RESET PRESSIONADO");
+    Serial.println("\nBOTÃO RESET PRESSIONADO");
 
     unsigned long tempoInicial = millis();
 
-    // Espera segurando por 5 segundos
     while (digitalRead(BOTAO_RESET) == LOW) {
 
       if (millis() - tempoInicial >= 10000) {
@@ -198,7 +154,7 @@ void loop() {
 
         preferences.end();
 
-        Serial.println("✅ RESET CONCLUÍDO");
+        Serial.println("RESET CONCLUÍDO");
 
         delay(2000);
 
@@ -211,13 +167,9 @@ void loop() {
     Serial.println("⏹️ RESET CANCELADO");
   }
 
-  // ===============================
-  // WIFI DESCONECTADO
-  // ===============================
-
   /*if (WiFi.status() != WL_CONNECTED) {
 
-    Serial.println("\n❌ WIFI DESCONECTADO");
+    Serial.println("\nWIFI DESCONECTADO");
 
     Serial.println("Deseja configurar nova rede?");
     Serial.println("Digite S para SIM");
@@ -254,10 +206,6 @@ void loop() {
 
     conectarWiFi();
   }*/
-
-  // ===============================
-  // AGUARDAR CARTÃO
-  // ===============================
 
   if (!mfrc522.PICC_IsNewCardPresent()) {
 
@@ -303,17 +251,13 @@ void loop() {
 
   lcd.print(rfidCode);
 
-  // ===============================
-  // ENVIAR PARA SERVIDOR
-  // ===============================
-
   if (WiFi.status() == WL_CONNECTED) {
 
     enviarParaServidor(rfidCode);
 
   } else {
 
-    Serial.println("⚠️ SEM WIFI");
+    Serial.println("SEM WIFI");
 
     digitalWrite(LED_VERMELHO, HIGH);
     delay(1000);
@@ -324,10 +268,6 @@ void loop() {
 
   delay(1500);
 }
-
-// ===============================
-// CONFIGURAÇÃO
-// ===============================
 
 void configurarSistema() {
 
@@ -354,10 +294,6 @@ void configurarSistema() {
 
   lcd.setCursor(0, 1);
   lcd.print(IP.toString());
-
-  // ============================
-  // PAGINA HTML
-  // ============================
 
   server.on("/", HTTP_GET, []() {
 
@@ -425,10 +361,6 @@ void configurarSistema() {
     server.send(200, "text/html", pagina);
   });
 
-  // ============================
-  // SALVAR CONFIG
-  // ============================
-
   server.on("/salvar", HTTP_GET, []() {
 
     ssid =
@@ -487,10 +419,6 @@ void configurarSistema() {
 
   Serial.println("Servidor iniciado");
 
-  // ============================
-  // LOOP CONFIG
-  // ============================
-
   while (modoConfiguracao) {
 
     server.handleClient();
@@ -498,10 +426,6 @@ void configurarSistema() {
     delay(10);
   }
 }
-
-// ===============================
-// WIFI
-// ===============================
 
 void conectarWiFi() {
 
@@ -538,7 +462,7 @@ void conectarWiFi() {
 
   if (WiFi.status() == WL_CONNECTED) {
 
-    Serial.println("✅ WIFI CONECTADO");
+    Serial.println("WIFI CONECTADO");
 
     Serial.print("IP ESP: ");
     Serial.println(WiFi.localIP());
@@ -557,7 +481,7 @@ void conectarWiFi() {
 
   } else {
 
-    Serial.println("❌ FALHA WIFI");
+    Serial.println("❌FALHA WIFI");
 
     Serial.print("CÓDIGO: ");
     Serial.println(WiFi.status());
@@ -575,10 +499,6 @@ void conectarWiFi() {
     digitalWrite(LED_VERMELHO, LOW);
   }
 }
-
-// ===============================
-// SERVIDOR
-// ===============================
 
 void enviarParaServidor(String rfid) {
 
@@ -624,7 +544,7 @@ void enviarParaServidor(String rfid) {
       lcd.setCursor(0, 1);
       lcd.print(laboratorio);
 
-      Serial.println("✅ ACESSO LIBERADO");
+      Serial.println("ACESSO LIBERADO");
 
       digitalWrite(LED_VERDE, HIGH);
       delay(1000);
@@ -640,7 +560,7 @@ void enviarParaServidor(String rfid) {
       lcd.setCursor(0, 1);
       lcd.print("NEGADO");
 
-      Serial.println("❌ ACESSO NEGADO");
+      Serial.println("ACESSO NEGADO");
 
       digitalWrite(LED_VERMELHO, HIGH);
       delay(1000);
@@ -657,7 +577,7 @@ void enviarParaServidor(String rfid) {
     lcd.setCursor(0, 1);
     lcd.print(httpCode);
 
-    Serial.println("❌ ERRO HTTP");
+    Serial.println("ERRO HTTP");
 
     digitalWrite(LED_VERMELHO, HIGH);
     delay(1000);
