@@ -86,11 +86,11 @@ DNSServer
 
 * [x] Leitura de cartões RFID
 * [x] Conexão Wi-Fi utilizando ESP32
-* [x] Comunicação HTTP com servidor
+* [x] Comunicação HTTP com servidor (No momento via Xampp)
 * [x] Display LCD para feedback ao usuário
-* [x] LEDs de acesso autorizado e negado
-* [x] Armazenamento persistente de configurações
-* [x] Portal Web para configuração inicial
+* [x] LEDs indicadores de estado -> Para inicialização e autorização de acesso
+* [x] Armazenamento persistente de configurações na ESP 32
+* [x] Pagina Web para configuração inicial
 * [x] Configuração de laboratório associada ao dispositivo
 * [x] Reset de fábrica do dispositivo
 
@@ -122,17 +122,29 @@ DNSServer
 ## 📂 Estrutura do Projeto
 
 ```text
-RFID/
-│
-├── esp_RFID/
-│   ├── esp_RFID.ino
-│   └── Leitura_esp_RFID/
-│
-├── API PHP
-│
-├── Banco de Dados MySQL
-│
-└── Documentação
+├── api
+│   └── dashboard_data.php
+├── BD
+│   └── Dashboard.sql
+├── RFID
+│   └── esp_RFID
+│       ├── Leitura_esp_RFID
+│       │   └── Leitura_esp_RFID.ino
+│       └── esp_RFID.ino
+├── api_rfid.php
+├── cadastrar.php
+├── config.php
+├── index.php
+├── init.php
+├── LICENSE
+├── limpar_sessao.php
+├── lista_acesso.php
+├── login.php
+├── monitor_acessos.php
+├── Readme
+├── Readme.md
+├── style.css
+└── teste.php
 ```
 
 ---
@@ -151,7 +163,7 @@ Adicione aqui uma foto do protótipo em funcionamento.
 
 🚧 Projeto em desenvolvimento (Etapa 2)
 
-Atualmente o sistema já realiza a leitura de cartões RFID, comunicação com servidor e validação de acesso. As próximas etapas envolvem a integração completa com o SiLab e o armazenamento do histórico de acessos.
+Atualmente o sistema já realiza a leitura de cartões RFID, comunicação com servidor e validação de acesso. As próximas etapas envolvem as reservas do laboratórios, o armazenamento do histórico de acessos e a confecção da embalagem do protótipo.
 
 ---
 
@@ -167,4 +179,4 @@ Projeto desenvolvido para a disciplina de Internet das Coisas (IoT).
 
 ## 📄 Licença
 
-Projeto desenvolvido para fins acadêmicos.
+Projeto desenvolvido para fins acadêmicos utilizando a Licença MIT.
