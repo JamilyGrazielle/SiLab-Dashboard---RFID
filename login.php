@@ -1,7 +1,6 @@
 <?php
 require_once 'config.php';
 
-// Se já estiver logado, redireciona para o dashboard
 verificarNaoLogado();
 
 $erro = '';
@@ -9,8 +8,7 @@ $erro = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $matricula = $_POST['matricula'] ?? '';
     $senha = $_POST['senha'] ?? '';
-    
-    // Buscar usuário com a matrícula informada
+
     $stmt = $pdo->prepare("SELECT * FROM usuario WHERE matricula = ? AND perfil = 'root' AND status = 'aprovado'");
     $stmt->execute([$matricula]);
     $usuario = $stmt->fetch();
@@ -20,11 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['usuario_nome'] = $usuario['nome_completo'];
         $_SESSION['perfil'] = $usuario['perfil'];
         $_SESSION['matricula'] = $usuario['matricula'];
-        
-        // Atualizar último login
+
         $pdo->prepare("UPDATE usuario SET data_ultimo_login = NOW() WHERE id = ?")->execute([$usuario['id']]);
-        
-        // Redirecionar
+
         header('Location: index.php');
         exit();
     } else {

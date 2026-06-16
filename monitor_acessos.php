@@ -2,7 +2,6 @@
 require_once 'config.php';
 verificarLogin();
 
-// Buscar últimos acessos
 $stmt = $pdo->prepare("
     SELECT 
         l.data_hora,
@@ -137,7 +136,7 @@ $acessos = $stmt->fetchAll();
                                     <td><strong><?php echo htmlspecialchars($acesso['nome_completo'] ?? 'Desconhecido'); ?></strong></td>
                                     <td><?php echo htmlspecialchars($acesso['matricula'] ?? 'N/A'); ?></td>
                                     <td><span class="laboratorio"><?php echo htmlspecialchars($detalhes['laboratorio'] ?? 'N/A'); ?></span></td>
-                                    <td><span class="badge-success">✅ Liberado</span></td>
+                                    <td><span class="badge-success">Liberado</span></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -200,7 +199,6 @@ $acessos = $stmt->fetchAll();
     </div>
 
     <script>
-        // Auto-refresh a cada 10 segundos
         setTimeout(function() {
             location.reload();
         }, 10000);

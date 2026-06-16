@@ -25,20 +25,17 @@ if ($filtro_data) {
     $params[] = $filtro_data;
 }
 
-// Buscar total para paginação
 $countQuery = str_replace("l.id, l.detalhes, l.data_hora, u.nome_completo, u.matricula", "COUNT(*) as total", $query);
 $stmt = $pdo->prepare($countQuery);
 $stmt->execute($params);
 $total = $stmt->fetch()['total'];
 $totalPages = ceil($total / $limit);
 
-// Buscar dados
 $query .= " ORDER BY l.data_hora DESC LIMIT $limit OFFSET $offset";
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $acessos = $stmt->fetchAll();
 
-// Laboratórios disponíveis
 $laboratorios = ['Lab 24', 'Lab 25', 'Lab 27'];
 ?>
 <!DOCTYPE html>
@@ -98,7 +95,6 @@ $laboratorios = ['Lab 24', 'Lab 25', 'Lab 27'];
                 <h1><i class="fas fa-door-open"></i> Lista de Acesso aos Laboratórios</h1>
             </div>
 
-            <!-- Filtros -->
             <div class="card">
                 <div class="card-body">
                     <form method="GET" class="filter-form">
@@ -130,7 +126,6 @@ $laboratorios = ['Lab 24', 'Lab 25', 'Lab 27'];
                 </div>
             </div>
 
-            <!-- Tabela de Acessos -->
             <div class="card">
                 <div class="card-header">
                     <h3><i class="fas fa-list"></i> Registros de Acesso</h3>
@@ -178,7 +173,6 @@ $laboratorios = ['Lab 24', 'Lab 25', 'Lab 27'];
                         </tbody>
                     </table>
 
-                    <!-- Paginação -->
                     <?php if ($totalPages > 1): ?>
                         <div class="pagination">
                             <?php for ($i = 1; $i <= $totalPages; $i++): ?>

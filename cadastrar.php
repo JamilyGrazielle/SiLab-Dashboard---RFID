@@ -6,7 +6,6 @@ $tab = $_GET['tab'] ?? 'professor';
 $mensagem = '';
 $tipoMensagem = '';
 
-// Processar cadastro de professor
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_professor'])) {
     $nome = trim($_POST['nome_completo']);
     $matricula = trim($_POST['matricula']);
@@ -52,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_professor']
     }
 }
 
-// Processar cadastro de RFID
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_rfid'])) {
     $professor_id = $_POST['professor_id'];
     $rfid = trim($_POST['rfid']);
@@ -73,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_rfid'])) {
     }
 }
 
-// Buscar professores para o select
 $professores = $pdo->query("SELECT id, nome_completo, matricula, rfid FROM usuario WHERE perfil = 'professor' AND status = 'aprovado' ORDER BY nome_completo")->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -195,7 +192,7 @@ $professores = $pdo->query("SELECT id, nome_completo, matricula, rfid FROM usuar
                                         <option value="<?php echo $prof['id']; ?>">
                                             <?php echo htmlspecialchars($prof['nome_completo']); ?> 
                                             (<?php echo htmlspecialchars($prof['matricula']); ?>)
-                                            <?php echo $prof['rfid'] ? ' - ✅ RFID cadastrado' : ''; ?>
+                                            <?php echo $prof['rfid'] ? ' - RFID cadastrado' : ''; ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -250,7 +247,6 @@ $professores = $pdo->query("SELECT id, nome_completo, matricula, rfid FROM usuar
     <script src="script.js"></script>
 
     <script>
-        // Simular leitura via teclado (leitor RFID)
         let rfidBuffer = '';
         let lastKeyTime = 0;
 
@@ -261,8 +257,6 @@ $professores = $pdo->query("SELECT id, nome_completo, matricula, rfid FROM usuar
                 if (rfidBuffer.length > 0) {
                     document.querySelector('input[name="rfid"]').value = rfidBuffer;
                     rfidBuffer = '';
-                    // Opcional: submeter automaticamente
-                    // document.querySelector('form').submit();
                 }
                 return;
             }
@@ -277,7 +271,6 @@ $professores = $pdo->query("SELECT id, nome_completo, matricula, rfid FROM usuar
             }
         });
 
-        // Foco automático no campo RFID
         document.querySelector('input[name="rfid"]').focus();
     </script>
 </body>

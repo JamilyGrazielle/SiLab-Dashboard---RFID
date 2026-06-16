@@ -1,25 +1,21 @@
 <?php
-// init.php - Script de inicialização do banco de dados
 require_once 'config.php';
 
 function inicializarBanco($pdo) {
     $mensagens = [];
     
     try {
-        // Verificar se a tabela usuario existe
         $stmt = $pdo->query("SHOW TABLES LIKE 'usuario'");
         if ($stmt->rowCount() == 0) {
             $mensagens[] = "⚠️ Tabelas não encontradas. Execute o script SQL primeiro.";
             return $mensagens;
         }
         
-        // Verificar se existe usuário root
         $stmt = $pdo->prepare("SELECT id FROM usuario WHERE perfil = 'root'");
         $stmt->execute();
         $root = $stmt->fetch();
         
         if (!$root) {
-            // Criar usuário root
             $senha_hash = password_hash('Root@00', PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO usuario (nome_completo, matricula, email, senha_hash, perfil, status) 
                                    VALUES ('Root Administrator', '20251SI0000', 'root@silab.com', ?, 'root', 'aprovado')");
@@ -29,19 +25,16 @@ function inicializarBanco($pdo) {
         } else {
             $mensagens[] = "✅ Usuário root já existe (ID: {$root['id']})";
         }
-        
-        // Verificar se existem laboratórios
+
         $stmt = $pdo->query("SELECT COUNT(*) as total FROM laboratorio");
         $totalLab = $stmt->fetch()['total'];
         
         if ($totalLab == 0) {
-            // Buscar ID do root para criar os laboratórios
             $stmt = $pdo->prepare("SELECT id FROM usuario WHERE perfil = 'root' LIMIT 1");
             $stmt->execute();
             $root = $stmt->fetch();
             $root_id = $root['id'];
             
-            // Criar laboratórios padrão
             $stmt = $pdo->prepare("INSERT INTO laboratorio (nome, capacidade, criado_por) VALUES 
                                    ('Lab 24', 30, ?),
                                    ('Lab 25', 30, ?),
@@ -52,7 +45,6 @@ function inicializarBanco($pdo) {
             $mensagens[] = "✅ Laboratórios já existem ($totalLab laboratórios)";
         }
         
-        // Verificar se já existem professores cadastrados
         $stmt = $pdo->query("SELECT COUNT(*) as total FROM usuario WHERE perfil = 'professor'");
         $totalProf = $stmt->fetch()['total'];
 
@@ -106,12 +98,11 @@ function inicializarBanco($pdo) {
                 ]);
             }
 
-            $mensagens[] = "✅ Professores cadastrados com sucesso!";
+            $mensagens[] = "Professores cadastrados com sucesso!";
     } else {
-        $mensagens[] = "✅ Professores já cadastrados ($totalProf professores)";
+        $mensagens[] = "Professores já cadastrados ($totalProf professores)";
     }
 
-        // Verificar se já existem professores cadastrados
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM usuario WHERE perfil = 'professor'");
 $totalProf = $stmt->fetch()['total'];
 
@@ -174,15 +165,10 @@ if ($totalProf == 0) {
         ]);
     }
 
-    $mensagens[] = "✅ Professores cadastrados!";
+    $mensagens[] = "Professores cadastrados!";
 } else {
-    $mensagens[] = "✅ Professores já cadastrados!";
+    $mensagens[] = "Professores já cadastrados!";
 }
-
-
-    // ===============================
-    // DISCIPLINAS E RESERVAS
-    // ===============================
 
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM disciplina");
     $totalDisc = $stmt->fetch()['total'];
@@ -313,35 +299,28 @@ if ($totalProf == 0) {
             $nomeDisciplina = $disciplina[1];
             $codigo = $disciplina[2];
 
-            // Inserir disciplina
             $stmtDisciplina->execute([
                 $codigo,
                 $nomeDisciplina
             ]);
 
-            // Buscar professor
             $stmtBuscarProfessor->execute([$professorNome]);
             $professor = $stmtBuscarProfessor->fetch();
 
-            // Buscar disciplina
             $stmtBuscarDisciplina->execute([$codigo]);
             $disciplinaBanco = $stmtBuscarDisciplina->fetch();
 
             if ($professor && $disciplinaBanco) {
 
-                // Vincular professor e disciplina
                 $stmtVinculo->execute([
                     $professor['id'],
                     $disciplinaBanco['id']
                 ]);
 
-                // Distribuição automática dos laboratórios
                 $laboratorioId = ($index % 3) + 1;
 
-                // Distribuição automática dos dias
                 $dia = $dias[$index % 5];
 
-                // Horários automáticos
                 $horaInicio = sprintf(
                     '%02d:00:00',
                     8 + ($index % 8)
@@ -352,7 +331,6 @@ if ($totalProf == 0) {
                     10 + ($index % 8)
                 );
 
-                // Criar reserva
                 $stmtReserva->execute([
                     $professor['id'],
                     $disciplinaBanco['id'],
@@ -364,25 +342,24 @@ if ($totalProf == 0) {
             }
         }
 
-        $mensagens[] = "✅ Disciplinas, vínculos e reservas criadas!";
+        $mensagens[] = "Disciplinas, vínculos e reservas criadas!";
     } else {
-        $mensagens[] = "✅ Disciplinas já cadastradas!";
+        $mensagens[] = "Disciplinas já cadastradas!";
     }
 
     } catch (PDOException $e) {
-        $mensagens[] = "❌ Erro: " . $e->getMessage();
+        $mensagens[] = "Erro: " . $e->getMessage();
     }
     
     return $mensagens;
 }
 
-// Se executado diretamente, mostrar mensagens
 if (basename($_SERVER['PHP_SELF']) == 'init.php') {
     echo "<h1>Inicialização do SiLab</h1>";
     echo "<pre>";
     $mensagens = inicializarBanco($pdo);
     echo implode("\n", $mensagens);
-    echo "\n\n✅ Sistema pronto para uso!";
+    echo "\n\nSistema pronto para uso!";
     echo "\n🔑 Login: matrícula 20251SI0000 | senha Root@00";
     echo "</pre>";
     echo "<a href='login.php'>Ir para o login →</a>";
