@@ -154,7 +154,7 @@ DNSServer
 Adicione aqui uma foto do protótipo em funcionamento.
 
 ```md
-![Protótipo](imagens/prototipo.jpg)
+![Protótipo](imagens/Montagem_Fisica_do_Prototipo.jpeg)
 ```
 
 ---
