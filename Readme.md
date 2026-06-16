@@ -4,7 +4,7 @@
 
 ## 📌 Sobre o Projeto
 
-O Sistema RFID para Controle de Acesso dos Laboratórios SiLab é uma solução desenvolvida para automatizar o processo de identificação e autorização de usuários nos laboratórios de informática do IFMA.
+O Sistema RFID para Controle de Acesso dos Laboratórios SiLab é uma solução desenvolvida para automatizar o processo de identificação e autorização de usuários nos laboratórios de informática do IFMA. Assim eliminando uma preocupação quanto a frequencia dos professores no laboratório. Buscando a otimização dos horários para que não hava laboratório parado.
 
 O sistema utiliza um leitor RFID conectado a um ESP32 para identificar cartões cadastrados e consultar suas permissões através do sistema SiLab. Após a validação, o dispositivo informa ao usuário se o acesso foi autorizado ou negado.
 
@@ -14,8 +14,8 @@ Implementar uma solução de controle de acesso baseada em RFID capaz de:
 
 * Identificar usuários através de cartões RFID;
 * Registrar acessos aos laboratórios;
-* Integrar-se ao sistema SiLab;
-* Aumentar a segurança dos ambientes;
+* Integrar-se a regra de negócio do sistema SiLab;
+* Alimentar o Sistema penalidade do Silab
 * Automatizar o gerenciamento de entrada de usuários.
 
 ---
@@ -25,7 +25,7 @@ Implementar uma solução de controle de acesso baseada em RFID capaz de:
 ```text
 Cartão RFID
       ↓
-Leitor MFRC522
+Leitor RFID MFRC522
       ↓
 ESP32
       ↓
@@ -45,19 +45,24 @@ Acesso Liberado ou Negado
 * ESP32
 * Módulo RFID MFRC522
 * Display LCD I2C 16x2
-* LEDs de sinalização
-* Botão de Reset
+* LED RGB
+* Modulo Botão
 * Protoboard
 * Jumpers
 
 ### Software
 
 * Arduino IDE
+* Git
+* GitHub
+
+---
+
+### Linguagens
+
 * C++
 * PHP
 * MySQL
-* Git
-* GitHub
 
 ---
 
@@ -91,12 +96,10 @@ DNSServer
 
 ---
 
-## 🚧 Funcionalidades em Desenvolvimento
+## 🚧 Funcionalidades em Desenvolvimento - Integração com funcionalidades do SILAB
 
-* [ ] Integração completa com o SiLab
 * [ ] Registro de histórico de acessos
 * [ ] Dashboard de monitoramento
-* [ ] Relatórios de utilização
 * [ ] Controle de permissões por laboratório
 * [ ] Controle de horários de acesso
 * [ ] Cadastro de usuários via interface web
