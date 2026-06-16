@@ -1,5 +1,4 @@
 <?php
-// api_rfid.php - API para receber leituras do RFID
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -7,13 +6,11 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require_once 'config.php';
 
-// Responder OPTIONS (pré-requisição CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-// Aceitar tanto GET quanto POST
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $rfid = $_GET['rfid'] ?? null;
     $laboratorio = $_GET['laboratorio'] ?? null;
@@ -31,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 }
 
-// Se for GET de professores
 if ($action === 'get_professores' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt = $pdo->prepare("SELECT id, nome_completo, matricula, rfid FROM usuario WHERE perfil = 'professor' AND (rfid IS NULL OR rfid = '') ORDER BY nome_completo");
     $stmt->execute();
@@ -112,7 +108,6 @@ if (!$rfid) {
     exit;
 }
 
-// Registrar log da leituras
 function registrarLogRFID($pdo, $rfid, $laboratorio, $status, $mensagem, $professor_id = null) {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     $detalhes = json_encode([
@@ -127,10 +122,8 @@ function registrarLogRFID($pdo, $rfid, $laboratorio, $status, $mensagem, $profes
     $stmt->execute([$professor_id, $detalhes, $ip]);
 }
 
-// Lista de laboratórios disponíveis
 $laboratorios_validos = ['Lab 24', 'Lab 25', 'Lab 27'];
 
-// Validar laboratório
 if (!$laboratorio || !in_array($laboratorio, $laboratorios_validos)) {
     echo json_encode([
         'success' => false, 
@@ -141,7 +134,6 @@ if (!$laboratorio || !in_array($laboratorio, $laboratorios_validos)) {
     exit;
 }
 
-// Buscar professor pelo RFID
 $stmt = $pdo->prepare("
     SELECT
         id,
@@ -164,10 +156,6 @@ if (!$professor) {
     exit;
 }
 
-// ===============================
-// VERIFICAR STATUS PROFESSOR
-// ===============================
-
 if ($professor['status'] !== 'aprovado') {
 
     echo json_encode([
@@ -187,10 +175,6 @@ if ($professor['status'] !== 'aprovado') {
     exit;
 }
 
-// ===============================
-// ROOT TEM ACESSO TOTAL
-// ===============================
-
 if ($professor['perfil'] === 'root') {
 
     liberarAcesso(
@@ -201,9 +185,6 @@ if ($professor['perfil'] === 'root') {
     );
 }
 
-// ===============================
-// VERIFICAR LABORATÓRIO
-// ===============================
 
 $stmt = $pdo->prepare("
     SELECT id, status_laboratorio
@@ -237,9 +218,6 @@ if (
     exit;
 }
 
-// ===============================
-// DIA E HORA ATUAL
-// ===============================
 
 $diasSemana = [
     'Sunday'    => 'domingo',
@@ -254,10 +232,6 @@ $diasSemana = [
 $diaAtual = $diasSemana[date('l')];
 
 $horaAtual = date('H:i:s');
-
-// ===============================
-// VERIFICAR RESERVA
-// ===============================
 
 $stmt = $pdo->prepare("
     SELECT
@@ -288,9 +262,6 @@ $stmt->execute([
 
 $reserva = $stmt->fetch();
 
-// ===============================
-// SEM RESERVA
-// ===============================
 
 if (!$reserva) {
 
@@ -313,9 +284,6 @@ if (!$reserva) {
     exit;
 }
 
-// ===============================
-// ACESSO LIBERADO
-// ===============================
 
 liberarAcesso(
     $pdo,

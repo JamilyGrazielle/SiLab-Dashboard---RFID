@@ -4,15 +4,12 @@ verificarLogin();
 
 $usuario_nome = $_SESSION['usuario_nome'];
 
-// Contar total de professores
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM usuario WHERE perfil = 'professor' AND status = 'aprovado'");
 $totalProfessores = $stmt->fetch()['total'];
 
-// Contar total de laboratórios
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM laboratorio");
 $totalLaboratorios = $stmt->fetch()['total'];
 
-// Contar acessos hoje
 $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM log_sistema WHERE entidade = 'acesso_laboratorio' AND DATE(data_hora) = CURDATE()");
 $stmt->execute();
 $acessosHoje = $stmt->fetch()['total'];
@@ -29,7 +26,6 @@ $acessosHoje = $stmt->fetch()['total'];
 </head>
 <body>
     <div class="dashboard">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -74,7 +70,6 @@ $acessosHoje = $stmt->fetch()['total'];
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
             <div class="top-bar">
                 <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
@@ -219,7 +214,6 @@ $acessosHoje = $stmt->fetch()['total'];
         }
         updateDateTime();
         
-        // Atualizar a cada minuto
         setInterval(updateDateTime, 60000);
     </script>
 </body>
