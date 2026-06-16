@@ -45,8 +45,8 @@ Acesso Liberado ou Negado
 * ESP32
 * Módulo RFID MFRC522
 * Display LCD I2C 16x2
-* LEDs de sinalização
-* Botão de Reset
+* LED RGB
+* Modulo Botão
 * Protoboard
 * Jumpers
 
@@ -91,12 +91,10 @@ DNSServer
 
 ---
 
-## 🚧 Funcionalidades em Desenvolvimento
+## 🚧 Funcionalidades em Desenvolvimento - Integração com funcionalidades do SILAB
 
-* [ ] Integração completa com o SiLab
 * [ ] Registro de histórico de acessos
 * [ ] Dashboard de monitoramento
-* [ ] Relatórios de utilização
 * [ ] Controle de permissões por laboratório
 * [ ] Controle de horários de acesso
 * [ ] Cadastro de usuários via interface web
