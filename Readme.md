@@ -154,7 +154,7 @@ DNSServer
 Adicione aqui uma foto do protótipo em funcionamento.
 
 ```md
-![Protótipo](https://github.com/JamilyGrazielle/SiLab-Dashboard---RFID/tree/e126333f2e97ccba0efcc37d69a42e674a7dac9e/imagens)
+![Protótipo](https://github.com/JamilyGrazielle/SiLab-Dashboard---RFID/tree/e126333f2e97ccba0efcc37d69a42e674a7dac9e/imagens/Montagem_Fisica_do_Prototipo.jpeg)
 ```
 
 ---
